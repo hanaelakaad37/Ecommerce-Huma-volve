@@ -1,4 +1,5 @@
 class SignUpModel {
+
   int? id;
   String? email;
   String? password;

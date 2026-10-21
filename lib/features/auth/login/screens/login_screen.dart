@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     emailController = TextEditingController();
     passwordController = TextEditingController();
     apiClient = ApiClient();
-    loginService =LoginService(apiClient);
+    loginService = LoginService(apiClient);
 
     super.initState();
   }
@@ -117,36 +117,37 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 32),
                 PrimaryButton(
                   text: 'Login',
-                  onPressed: () async{
+                  onPressed: () async {
                     if (_formKey.currentState?.validate() ?? false) {
                       setState(() {
                         EasyLoading.show();
-
                       });
-                     try{
-                      final response = await loginService.login(
+                      try {
+                        final response = await loginService.login(
                           email: emailController.text.trim(),
-                          password: passwordController.text);
+                          password: passwordController.text,
+                        );
 
-                      setState(() {
-                        EasyLoading.dismiss();
-                      });
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => MainNavigationScreen(),
-                        ),
-                      );
-                     }on DioException catch(e){
-                       setState(() {
-                         EasyLoading.dismiss();
-                       });
-                      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                       BotToastService.showErrorMessage("Email or Password are invalid !");
-                       if (kDebugMode) {
-                         print(e);
-                       }
-
-                     }
+                        setState(() {
+                          EasyLoading.dismiss();
+                        });
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => MainNavigationScreen(),
+                          ),
+                        );
+                      } on DioException catch (e) {
+                        setState(() {
+                          EasyLoading.dismiss();
+                        });
+                        // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                        BotToastService.showErrorMessage(
+                          "Email or Password are invalid !",
+                        );
+                        if (kDebugMode) {
+                          print(e);
+                        }
+                      }
                     }
                   },
                 ),

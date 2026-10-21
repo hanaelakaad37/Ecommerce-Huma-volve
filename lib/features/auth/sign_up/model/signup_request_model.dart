@@ -4,12 +4,5 @@ class SignupRequestModel {
   String? name;
   String? avatar;
 
-
-  SignupRequestModel({
-    this.email,
-    this.password,
-    this.name,
-    this.avatar,
-  });
-
+  SignupRequestModel({this.email, this.password, this.name, this.avatar});
 }

@@ -19,9 +19,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const SplashScreen(),
-      builder: EasyLoading.init(
-        builder: BotToastInit(),
-      ),
+      builder: EasyLoading.init(builder: BotToastInit()),
     );
   }
 }

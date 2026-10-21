@@ -155,6 +155,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         BotToastService.showErrorMessage(
                           "Something went wrong. Please try again.",
                         );
+
                         if (kDebugMode) {
                           print(e);
                         }
