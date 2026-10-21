@@ -1,6 +1,11 @@
-
+import 'package:dio/dio.dart';
+import 'package:ecommerce_app_huma_volve/core/network/api_client.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/login/service/login_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
+import '../../../../core/services/snackbar/Snackbar_service.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/theme.dart';
@@ -18,11 +23,15 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
+  late final LoginService loginService;
+  late final ApiClient apiClient;
 
   @override
   void initState() {
     emailController = TextEditingController();
     passwordController = TextEditingController();
+    apiClient = ApiClient();
+    loginService =LoginService(apiClient);
 
     super.initState();
   }
@@ -108,13 +117,36 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 32),
                 PrimaryButton(
                   text: 'Login',
-                  onPressed: () {
+                  onPressed: () async{
                     if (_formKey.currentState?.validate() ?? false) {
+                      setState(() {
+                        EasyLoading.show();
+
+                      });
+                     try{
+                      final response = await loginService.login(
+                          email: emailController.text.trim(),
+                          password: passwordController.text);
+
+                      setState(() {
+                        EasyLoading.dismiss();
+                      });
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (context) => MainNavigationScreen(),
                         ),
                       );
+                     }on DioException catch(e){
+                       setState(() {
+                         EasyLoading.dismiss();
+                       });
+                      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                       BotToastService.showErrorMessage("Email or Password are invalid !");
+                       if (kDebugMode) {
+                         print(e);
+                       }
+
+                     }
                     }
                   },
                 ),

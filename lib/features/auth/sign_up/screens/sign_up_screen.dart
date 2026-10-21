@@ -1,5 +1,14 @@
-import 'package:flutter/material.dart';
+import 'dart:math';
 
+import 'package:dio/dio.dart';
+import 'package:ecommerce_app_huma_volve/core/network/api_client.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/sign_up/model/signup_request_model.dart';
+import 'package:ecommerce_app_huma_volve/features/auth/sign_up/service/sign_up_service.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+
+import '../../../../core/services/snackbar/Snackbar_service.dart';
 import '../../../../core/widgets/custom_text_field.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/theme.dart';
@@ -17,12 +26,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   late final TextEditingController nameController;
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
+  late final SignUpService signUpService;
+  late final ApiClient apiClient;
 
   @override
   void initState() {
     nameController = TextEditingController();
     emailController = TextEditingController();
     passwordController = TextEditingController();
+    apiClient = ApiClient();
+    signUpService = SignUpService(apiClient);
 
     super.initState();
   }
@@ -112,12 +125,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   text: 'Sign Up',
                   onPressed: () async {
                     if (_formKey.currentState?.validate() ?? false) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                      );
+                      setState(() {
+                        EasyLoading.show();
+                      });
+                      try {
+                        final response = await signUpService.signUp(
+                          SignupRequestModel(
+                            name: nameController.text.trim(),
+                            email: emailController.text.trim(),
+                            password: passwordController.text.trim(),
+                          ),
+                        );
+                        setState(() {
+                          EasyLoading.dismiss();
+                        });
+                        BotToastService.showSuccessMessage(
+                          "Account created successfully!'",
+                        );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      } on DioException catch (e) {
+                        setState(() {
+                          EasyLoading.dismiss();
+                        });
+                        BotToastService.showErrorMessage(
+                          "Something went wrong. Please try again.",
+                        );
+                        if (kDebugMode) {
+                          print(e);
+                        }
+                      }
                     }
                   },
                 ),
