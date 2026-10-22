@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../core/dummy_data.dart';
-import '../../../core/theme.dart';
-import '../../details/screens/product_details_screen.dart';
+
+import '../../../../core/dummy_data.dart';
+import '../../../../core/theme.dart';
+import '../../../details/screens/product_details_screen.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -53,6 +54,16 @@ class ProductCard extends StatelessWidget {
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: double.infinity,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          color: Colors.grey.shade200,
+                          child: Center(
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              color: Colors.grey,
+                              size: 32,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
