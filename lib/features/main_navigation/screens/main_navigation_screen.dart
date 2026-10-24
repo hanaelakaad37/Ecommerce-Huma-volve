@@ -1,11 +1,14 @@
 import 'package:ecommerce_app_huma_volve/core/network/api_client.dart';
-import 'package:ecommerce_app_huma_volve/features/home/cubit/home_cubit.dart';
-import 'package:ecommerce_app_huma_volve/features/home/service/home_service.dart';
+import 'package:ecommerce_app_huma_volve/features/home/data/data_source/home_data_source_imp.dart';
+import 'package:ecommerce_app_huma_volve/features/home/data/repository_imp/repository_imp.dart';
+import 'package:ecommerce_app_huma_volve/features/home/domain/use_case/category_use_case.dart';
+import 'package:ecommerce_app_huma_volve/features/home/domain/use_case/product_use_case.dart';
+import 'package:ecommerce_app_huma_volve/features/home/presentation/view_model/cubit/home_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/theme.dart';
-import '../../home/screens/home_screen.dart';
 import '../../cart/screens/cart_screen.dart';
+import '../../home/presentation/view/screens/home_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -19,31 +22,35 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
   late final ApiClient apiClient;
   late final HomeCubit homeCubit;
-  late final HomeService homeService;
 
-@override
+  @override
   void initState() {
-  apiClient =ApiClient();
-  homeService= HomeService(apiClient);
-  homeCubit = HomeCubit(homeService);
     super.initState();
-  }
+    apiClient = ApiClient();
+    final dataSource = HomeDataSourceImp(apiClient);
+    final repository = RepositoryImp(dataSource);
+    final categoryUseCase = CategoryUseCase(repository);
+    final productUseCase = ProductUseCase(repository);
 
+    homeCubit = HomeCubit(
+      categoryUseCase: categoryUseCase,
+      productUseCase: productUseCase,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _screens = [
-      BlocProvider(
-        create:(BuildContext context) => homeCubit ,
-        child:  const HomeScreen(),
+    final List<Widget> screens = [
+      BlocProvider.value(
+        value: homeCubit,
+        child: const HomeScreen(),
       ),
-
       const CartScreen(),
       const ProfileScreen(),
     ];
 
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: screens[_currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
