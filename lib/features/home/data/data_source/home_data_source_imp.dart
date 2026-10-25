@@ -19,9 +19,19 @@ class HomeDataSourceImp implements  HomeRemoteDataSource {
   }
 
   @override
-  Future<List<ProductModel>> getProducts(int? categoryId) async{
+  Future<List<ProductModel>> getProducts(
+    int? categoryId, {
+    required int limit,
+    required int offset,
+  }) async {
+    final String product = "${EndPoints.categories}/$categoryId/${EndPoints.products}";
+
     final response = await _apiClient.dio.get(
-      "${EndPoints.categories}/$categoryId/${EndPoints.products}",
+      product,
+      queryParameters: {
+        "limit": limit,
+        "offset": offset,
+      },
     );
     final List jsonData = response.data;
     final List<ProductModel> products = jsonData

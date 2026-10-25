@@ -4,11 +4,26 @@ import 'package:ecommerce_app_huma_volve/core/failure/failure.dart';
 class ErrorHandling {
   static Failure handle(dynamic exception) {
     if (exception is DioException) {
+      if (exception.response?.data != null) {
+        final data = exception.response!.data;
+        if (data is Map && data.containsKey('message')) {
+          final msg = data['message'];
+          if (msg is List && msg.isNotEmpty) {
+            return Failure(errorMessage: msg.first.toString());
+          } else if (msg is String && msg.isNotEmpty) {
+            return Failure(errorMessage: msg);
+          }
+        }
+      }
       return _handleRemoteError(exception.toString());
     }
 
-    return const Failure(
-      errorMessage: "Unexpected Error",
+    if (exception is Failure) {
+      return exception;
+    }
+
+    return Failure(
+      errorMessage: exception?.toString() ?? "Unexpected Error",
     );
   }
 
@@ -78,15 +93,6 @@ class ErrorHandling {
         errorMessage.contains("FormatException")) {
       return const Failure(
         errorMessage: "Processing Error",
-      );
-    }
-
-    // Return the original error if it is meaningful
-    if (errorMessage.isNotEmpty &&
-        errorMessage.contains("Exception") &&
-        errorMessage.contains("Error")) {
-      return Failure(
-        errorMessage: errorMessage,
       );
     }
 

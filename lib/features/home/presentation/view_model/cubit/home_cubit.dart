@@ -11,6 +11,14 @@ class HomeCubit extends Cubit<HomeState> {
   final CategoryUseCase categoryUseCase;
   final ProductUseCase productUseCase;
 
+  final int limit = 10;
+  int offset = 0;
+  bool loadingMore = false;
+  bool hasMore = true;
+  int? selectedCategory;
+
+  List<ProductEntity> allProducts = [];
+
   HomeCubit({
     required this.categoryUseCase,
     required this.productUseCase,
@@ -36,15 +44,60 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> getProducts(int? categoryId) async {
+    selectedCategory = categoryId;
+    offset = 0;
+    hasMore = true;
+    loadingMore = false;
+    allProducts = [];
+
     emit(ProductLoading());
 
-    final productsResult = await productUseCase.call(categoryId);
+    final productsResult = await productUseCase.call(
+      selectedCategory,
+      limit: limit,
+      offset: offset,
+    );
+
     productsResult.fold(
       (failure) {
         emit(ProductError((failure as dynamic).errorMessage?.toString() ?? failure.toString()));
       },
       (products) {
-        emit(ProductSuccess(products));
+        allProducts = List.from(products);
+        offset = allProducts.length;
+        if (products.length < limit) {
+          hasMore = false;
+        }
+        emit(ProductSuccess(List.from(allProducts)));
+      },
+    );
+  }
+
+  Future<void> loadMoreProducts() async {
+    if (loadingMore || !hasMore || state is! ProductSuccess) return;
+
+    loadingMore = true;
+    emit(ProductSuccess(List.from(allProducts)));
+
+    final productsResult = await productUseCase.call(
+      selectedCategory,
+      limit: limit,
+      offset: offset,
+    );
+
+    productsResult.fold(
+      (failure) {
+        loadingMore = false;
+        emit(ProductSuccess(List.from(allProducts)));
+      },
+      (newProducts) {
+        allProducts.addAll(newProducts);
+        offset = allProducts.length;
+        if (newProducts.length < limit) {
+          hasMore = false;
+        }
+        loadingMore = false;
+        emit(ProductSuccess(List.from(allProducts)));
       },
     );
   }

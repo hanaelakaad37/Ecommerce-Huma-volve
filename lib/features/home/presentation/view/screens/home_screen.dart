@@ -21,16 +21,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _searchQuery = '';
   int _selectedCategoryIndex = 0;
+  late final ScrollController scrollController;
 
   @override
   void initState() {
-    super.initState();
     context.read<HomeCubit>().getHomeData();
+    scrollController = ScrollController();
+    scrollController.addListener(_onListen);
+    super.initState();
+  }
+
+  void _onListen() {
+    final pixels = scrollController.position.pixels;
+    final max = scrollController.position.maxScrollExtent;
+    const triggerDistance = 200;
+    if (pixels >= max - triggerDistance) {
+      context.read<HomeCubit>().loadMoreProducts();
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    scrollController.removeListener(_onListen);
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -40,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppTheme.background,
       body: SafeArea(
         child: CustomScrollView(
+          controller: scrollController,
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
@@ -276,8 +291,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 24),
+            BlocBuilder<HomeCubit, HomeState>(
+              builder: (context, state) {
+                final cubit = context.read<HomeCubit>();
+                if (cubit.loadingMore) {
+                  return const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                  );
+                }
+                return const SliverToBoxAdapter(
+                  child: SizedBox(height: 24),
+                );
+              },
             ),
           ],
         ),

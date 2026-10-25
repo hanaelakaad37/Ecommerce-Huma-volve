@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,7 +6,6 @@ import '../../domain/entities/sign_up_entity.dart';
 import '../../domain/entities/sign_up_request_entity.dart';
 import '../../domain/use_case/login_use_case.dart';
 import '../../domain/use_case/sign_up_use_case.dart';
-
 
 part 'auth_state.dart';
 
@@ -33,15 +31,10 @@ class AuthCubit extends Cubit<AuthState> {
       );
 
       result.fold(
-            (failure) {
-          emit(
-            LoginError(
-              (failure as dynamic).errorMessage?.toString() ??
-                  failure.toString(),
-            ),
-          );
+        (failure) {
+          emit(LoginError(failure.errorMessage));
         },
-            (loginEntity) {
+        (loginEntity) {
           emit(LoginSuccess(loginEntity));
         },
       );
@@ -57,15 +50,10 @@ class AuthCubit extends Cubit<AuthState> {
       final result = await signUpUseCase.call(request);
 
       result.fold(
-            (failure) {
-          emit(
-            SignUpError(
-              (failure as dynamic).errorMessage?.toString() ??
-                  failure.toString(),
-            ),
-          );
+        (failure) {
+          emit(SignUpError(failure.errorMessage));
         },
-            (signUpEntity) {
+        (signUpEntity) {
           emit(SignUpSuccess(signUpEntity));
         },
       );

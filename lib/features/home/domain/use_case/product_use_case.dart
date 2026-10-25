@@ -8,8 +8,11 @@ class ProductUseCase {
   final HomeRepository _homeRepository;
   ProductUseCase(this._homeRepository);
 
-  Future<Either<ErrorHandling,List<ProductEntity>>>call(int? categoryId){
-    return _homeRepository.getProducts(categoryId);
+  Future<Either<ErrorHandling,List<ProductEntity>>>call(    int? categoryId, {
+    required int limit,
+    required int offset,
+  }){
+    return _homeRepository.getProducts(categoryId, limit: limit, offset: offset);
   }
 
 }
