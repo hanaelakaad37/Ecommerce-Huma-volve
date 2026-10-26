@@ -1,39 +1,30 @@
+
 import 'package:flutter/material.dart';
 
-import '../../../../../../core/dummy_data.dart';
 import '../../../../../../core/theme.dart';
-import '../../../../../details/screens/product_details_screen.dart';
+import '../../../../../details/presentation/view/screens/product_details_screen.dart';
 import '../../../../domain/entities/product_entity.dart';
-
 
 class ProductCard extends StatelessWidget {
   final ProductEntity product;
-  const ProductCard({super.key, required this.product});
 
-  Product _toProduct(ProductEntity entity) {
-    String img = '';
-    if (entity.images.isNotEmpty) {
-      img = entity.images.first.replaceAll(RegExp(r'[\[\]"]'), '').trim();
-    }
-    if (img.isEmpty || !img.startsWith('http')) {
-      img = 'https://picsum.photos/seed/${entity.id}/300/300';
-    }
-    return Product(
-      id: entity.id.toString(),
-      name: entity.title,
-      description: entity.description,
-      price: entity.price.toDouble(),
-      imageUrl: img,
-      colors: const [Colors.black, Colors.blue, Colors.grey],
-      sizes: const ['S', 'M', 'L', 'XL'],
-    );
-  }
+  const ProductCard({
+    super.key,
+    required this.product,
+  });
 
   String _getImageUrl() {
     if (product.images.isNotEmpty) {
-      String img = product.images.first.replaceAll(RegExp(r'[\[\]"]'), '').trim();
-      if (img.startsWith('http')) return img;
+      final image = product.images.first
+          .replaceAll(RegExp(r'[\[\]"]'), '')
+          .trim();
+
+      if (image.startsWith('http://') ||
+          image.startsWith('https://')) {
+        return image;
+      }
     }
+
     return 'https://picsum.photos/seed/${product.id}/300/300';
   }
 
@@ -45,10 +36,16 @@ class ProductCard extends StatelessWidget {
           context,
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 500),
-            pageBuilder: (context, animation, secondaryAnimation) => 
-                ProductDetailsScreen(product: _toProduct(product)),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                ProductDetailsScreen(
+                  productId: product.id,
+                ),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
             },
           ),
         );
@@ -76,22 +73,26 @@ class ProductCard extends StatelessWidget {
                   Hero(
                     tag: 'product-${product.id}',
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(24),
+                      ),
                       child: Image.network(
                         _getImageUrl(),
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: double.infinity,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: Colors.grey.shade200,
-                          child: Center(
-                            child: const Icon(
-                              Icons.image_not_supported,
-                              color: Colors.grey,
-                              size: 32,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.shade200,
+                            child: const Center(
+                              child: Icon(
+                                Icons.image_not_supported,
+                                color: Colors.grey,
+                                size: 32,
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -117,7 +118,7 @@ class ProductCard extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.end,

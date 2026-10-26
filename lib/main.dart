@@ -2,6 +2,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
+import 'core/routes/app_router.dart';
 import 'core/theme.dart';
 import 'features/splash/screens/splash_screen.dart';
 
@@ -14,11 +15,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'E-Commerce App',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const SplashScreen(),
+      routerConfig: appRouting,
+
+      //  home: const SplashScreen(),
       builder: EasyLoading.init(
         builder: BotToastInit(),
       ),
